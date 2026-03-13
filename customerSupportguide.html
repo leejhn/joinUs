@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>도움말</title>
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    /* ── Reset & Base ── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Light Theme (기본) ── */
+    :root {
+      --bg: #f8f9fc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --accent: #4f46e5;
+      --accent2: #06b6d4;
+      --text: #1e293b;
+      --muted: #64748b;
+      --code-bg: #f1f5f9;
+      --tag-bg: rgba(79, 70, 229, 0.08);
+      --warn-bg: rgba(245, 158, 11, 0.08);
+      --warn-border: #f59e0b;
+      --tip-bg: rgba(6, 182, 212, 0.08);
+      --tip-border: #06b6d4;
+      --radius: 12px;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ── Dark Theme (선택) ── */
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: #334155;
+      --accent: #818cf8;
+      --accent2: #22d3ee;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --code-bg: #111827;
+      --tag-bg: rgba(129, 140, 248, 0.15);
+      --warn-bg: rgba(251, 191, 36, 0.1);
+      --warn-border: #fbbf24;
+      --tip-bg: rgba(34, 211, 238, 0.1);
+      --tip-border: #22d3ee;
+      --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── 테마 전환 애니메이션 ── */
+    body,
+    .header,
+    .toc,
+    .content,
+    .footer,
+    .code-block,
+    .callout,
+    .md-table th,
+    .md-table td {
+      transition: background .25s, color .25s, border-color .25s;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      font-size: 13.5px;
+      line-height: 1.7;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 99px;
+    }
+
+    /* ── Layout ── */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Header Optimization ── */
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .title-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .header h1 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+
+    .version {
+      font-size: 9px;
+      color: var(--muted);
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    /* ── Theme Toggle ── */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 2px;
+      gap: 1px;
+      flex-shrink: 0;
+    }
+
+    .theme-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 99px;
+      cursor: pointer;
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      color: var(--muted);
+      transition: all .2s;
+    }
+
+    .theme-btn.active {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ── TOC ── */
+    .toc {
+      display: flex;
+      gap: 6px;
+      padding: 10px 16px;
+      overflow-x: auto;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc::-webkit-scrollbar {
+      display: none;
+    }
+
+    .toc-btn {
+      font-size: 11.5px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .toc-btn:hover,
+    .toc-btn.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--tag-bg);
+    }
+
+    /* ── Content ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      scroll-behavior: smooth;
+    }
+
+    .section {
+      margin-bottom: 32px;
+      animation: fadeIn .4s ease both;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .section-anchor {
+      position: relative;
+      top: -10px;
+    }
+
+    /* ── Typography & Elements ── */
+    h2.md-h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--tag-bg);
+    }
+
+    h3.md-h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 18px 0 8px;
+    }
+
+    h3.md-h3::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 12px;
+      background: var(--accent2);
+      margin-right: 8px;
+      border-radius: 2px;
+    }
+
+    p.md-p {
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Code block ── */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 12px 0;
+      overflow: hidden;
+    }
+
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .code-lang {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    .copy-btn {
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      padding: 3px 8px;
+      border-radius: 6px;
+      transition: all .2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    pre {
+      padding: 14px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* ── Callout ── */
+    .callout {
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin: 16px 0;
+      font-size: 12.5px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      border: 1px solid transparent;
+    }
+
+    .callout.warn {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      color: var(--text);
+    }
+
+    .callout.tip {
+      background: var(--tip-bg);
+      border-color: var(--tip-border);
+      color: var(--text);
+    }
+
+    .callout strong {
+      font-weight: 700;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div class="logo">📋</div>
+        <div class="title-wrap">
+          <h1>고객사 문의 대응 가이드</h1>
+          <span class="version">v1.2 (최적화 버전)</span>
+        </div>
+        <!-- 테마 토글 -->
+        <div class="theme-toggle">
+          <button class="theme-btn active" id="btn-light" onclick="setTheme('light')" title="라이트 테마">☀️</button>
+          <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')" title="다크 테마">🌙</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOC -->
+    <div class="toc">
+      <button class="toc-btn active" onclick="scrollToId('intro')">🚀 시작</button>
+      <button class="toc-btn" onclick="scrollToId('func')">📐 함수</button>
+      <button class="toc-btn" onclick="scrollToId('shortcut')">⌨️ 단축키</button>
+      <button class="toc-btn" onclick="scrollToId('script')">⚙️ 스크립트</button>
+      <button class="toc-btn" onclick="scrollToId('faq')">❓ FAQ</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content">
+
+      <!-- ① 시작하기 -->
+      <div class="section">
+        <span class="section-anchor" id="intro"></span>
+        <h2 class="md-h2">🚀 시작하기</h2>
+        <p class="md-p">이 가이드는 고객사 대응 시 필요한 <strong>핵심 기능</strong>을 집약해두었습니다.</p>
+
+        <div class="callout tip">
+          <span>💡</span>
+          <div><strong>알림:</strong> 상단 카테고리 버튼을 클릭하면 원하는 섹션으로 즉시 이동합니다.</div>
+        </div>
+
+        <h3 class="md-h3">기본 운영 가이드</h3>
+        <p class="md-p">기존 데이터 위에 바로 입력하거나 <code>F2</code> 키로 내용을 수정할 수 있습니다. <code>Delete</code> 키는 셀의 내용만 삭제하며 서식은
+          유지됩니다.</p>
+      </div>
+
+      <!-- ② 자주 쓰는 함수 -->
+      <div class="section">
+        <span class="section-anchor" id="func"></span>
+        <h2 class="md-h2">📐 핵심 함수</h2>
+        <h3 class="md-h3">자동화 수식 예시</h3>
+        <div class="code-block" data-code="=XLOOKUP(A1, Info!A:A, Info!B:B)">
+          <div class="code-block-header">
+            <span class="code-lang">formula</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><code>=XLOOKUP(A1, Info!A:A, Info!B:B)</code></pre>
+        </div>
+      </div>
+
+      <!-- ③ 단축키 -->
+      <div class="section">
+        <span class="section-anchor" id="shortcut"></span>
+        <h2 class="md-h2">⌨️ 생산성 단축키</h2>
+        <h3 class="md-h3">필수 편집</h3>
+        <p class="md-p"><code>Ctrl + D</code>: 위의 수식을 아래로 복사<br><code>Ctrl + ;</code>: 오늘 날짜 즉시 입력</p>
+      </div>
+
+      <div class="section">
+        <span class="section-anchor" id="script"></span>
+        <h2 class="md-h2">⚙️ Apps Script</h2>
+        <p class="md-p">고급 자동화 기능을 실행하기 위한 영역입니다.</p>
+      </div>
+
+      <div class="section">
+        <span class="section-anchor" id="faq"></span>
+        <h2 class="md-h2">❓ 자주 묻는 질문</h2>
+        <div class="callout warn">
+          <span>⚠️</span>
+          <div><strong>데이터 보호:</strong> 공유 시 편집 권한 범위를 반드시 확인하세요.</div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- Footer -->
+    <div class="footer">
+      Powered by &nbsp;<a href="#">Antigravity AI</a>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <script>
+    // ── 테마 전환 ──
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('btn-dark').classList.toggle('active', theme === 'dark');
+      document.getElementById('btn-light').classList.toggle('active', theme === 'light');
+      localStorage.setItem('sidebar-theme', theme);
+    }
+
+    // ── 스크롤 이동 ──
+    function scrollToId(id) {
+      const el = document.getElementById(id);
+      const content = document.getElementById('content');
+      if (el) {
+        content.scrollTo({
+          top: el.offsetTop - 5,
+          behavior: 'smooth'
+        });
+      }
+
+      // 버튼 활성 상태
+      document.querySelectorAll('.toc-btn').forEach(b => b.classList.remove('active'));
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+    }
+
+    // ── 코드 복사 ──
+    function copyCode(btn) {
+      const code = btn.closest('.code-block').dataset.code;
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = '✓ 복사됨';
+        btn.style.color = 'var(--accent2)';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.color = '';
+        }, 1500);
+      });
+    }
+
+    // ── 초기화 ──
+    (function () {
+      const saved = localStorage.getItem('sidebar-theme');
+      setTheme(saved === 'dark' ? 'dark' : 'light');
+    })();
+  </script>
+</body>
+
+</html>
